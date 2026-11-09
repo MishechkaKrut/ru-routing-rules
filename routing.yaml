@@ -1,3 +1,10 @@
+proxy-groups:
+  - name: PROXY
+    type: select
+    include-all: true
+    proxies:
+      - DIRECT
+
 rule-providers:
   ru-domains:
     type: http
