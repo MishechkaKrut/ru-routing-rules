@@ -1,8 +1,7 @@
 proxy-groups:
-  - name: PROXY
+  - name: TEST
     type: select
     proxies:
-      - VPN-bleood
       - DIRECT
 
 rule-providers:
