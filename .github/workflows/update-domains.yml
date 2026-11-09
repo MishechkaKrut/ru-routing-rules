@@ -21,27 +21,29 @@ jobs:
           curl -fL \
             https://raw.githubusercontent.com/kyoresuas/ru-direct/release/ru-full.domains.txt \
             -o ru-full.domains.txt
-
           test -s ru-full.domains.txt
 
       - name: Generate v2rayN routing rules
         run: |
           python3 - <<'PY'
             import json
-            import re
             from pathlib import Path
 
-            source = Path("ru-full.domains.txt")
             domains = []
-
-            for line in source.read_text(encoding="utf-8").splitlines():
-                value = line.strip().rstrip(",")
+            for line in Path("ru-full.domains.txt").read_text(encoding="utf-8").splitlines():
+                value = line.strip().rstrip(",").lower().rstrip(".")
                 if not value or value.startswith("#"):
                     continue
                 if value.startswith("domain:"):
                     value = value[len("domain:"):]
-                value = value.strip().lower().rstrip(".")
-                if not re.fullmatch(r"(?=.{1,253}$)(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)(?:\\.(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?))*", value):
+                labels = value.split(".")
+                valid = len(value) <= 253 and all(
+                    label and len(label) <= 63 and
+                    label[0].isalnum() and label[-1].isalnum() and
+                    all(ch.isalnum() or ch == "-" for ch in label)
+                    for label in labels
+                )
+                if not valid:
                     raise SystemExit(f"Invalid domain in source list: {value}")
                 domains.append("domain:" + value)
 
@@ -49,31 +51,25 @@ jobs:
             if not domains:
                 raise SystemExit("Domain list is empty; refusing to publish empty rules")
 
-            rules = [
-                {
-                    "remarks": "RU domains DIRECT",
-                    "domain": domains,
-                    "outboundTag": "direct",
-                    "enabled": True
-                }
-            ]
-
+            rules = [{
+                "remarks": "RU domains DIRECT",
+                "domain": domains,
+                "outboundTag": "direct",
+                "enabled": True
+            }]
             Path("ru-direct.json").write_text(
-                json.dumps(rules, ensure_ascii=False, indent=2) + "\\n",
+                json.dumps(rules, ensure_ascii=False, indent=2) + chr(10),
                 encoding="utf-8"
             )
             print(f"Generated ru-direct.json with {len(domains)} unique domains")
           PY
-
           test -s ru-direct.json
 
       - name: Commit changes
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-
           git add ru-full.domains.txt ru-direct.json
-
           if ! git diff --cached --quiet; then
             git commit -m "Update Russian domain list and v2rayN rules"
             git push
