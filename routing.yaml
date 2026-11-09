@@ -1,8 +1,8 @@
 proxy-groups:
   - name: PROXY
     type: select
-    include-all: true
     proxies:
+      - VPN-bleood
       - DIRECT
 
 rule-providers:
