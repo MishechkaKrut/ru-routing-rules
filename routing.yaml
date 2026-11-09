@@ -1,0 +1,13 @@
+rule-providers:
+  ru-domains:
+    type: http
+    behavior: domain
+    format: text
+    url: "https://raw.githubusercontent.com/MishechkaKrut/ru-routing-rules/main/ru-full.domains.txt"
+    path: ./ruleset/ru-domains.yaml
+    interval: 86400
+
+rules:
+  - GEOIP,private,DIRECT,no-resolve
+  - RULE-SET,ru-domains,DIRECT
+  - MATCH,PROXY
