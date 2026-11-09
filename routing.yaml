@@ -1,9 +1,3 @@
-proxy-groups:
-  - name: PROXY
-    type: select
-    proxies:
-      - DIRECT
-
 rule-providers:
   ru-domains:
     type: http
@@ -16,4 +10,3 @@ rule-providers:
 rules:
   - GEOIP,private,DIRECT,no-resolve
   - RULE-SET,ru-domains,DIRECT
-  - MATCH,PROXY
