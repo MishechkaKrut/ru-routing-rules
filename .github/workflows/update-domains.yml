@@ -1,0 +1,39 @@
+name: Update Russian Domains
+
+on:
+  schedule:
+    - cron: "0 3 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download ru-full.domains.txt
+        run: |
+          curl -fL \
+            https://raw.githubusercontent.com/kyoresuas/ru-direct/release/ru-full.domains.txt \
+            -o ru-full.domains.txt
+
+          test -s ru-full.domains.txt
+
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add ru-full.domains.txt
+
+          if ! git diff --cached --quiet; then
+            git commit -m "Update Russian domain list"
+            git push
+          else
+            echo "No changes"
+          fi
