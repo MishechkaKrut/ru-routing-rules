@@ -27,42 +27,42 @@ jobs:
       - name: Generate v2rayN routing rules
         run: |
           python3 - <<'PY'
-          import json
-          import re
-          from pathlib import Path
+            import json
+            import re
+            from pathlib import Path
 
-          source = Path("ru-full.domains.txt")
-          domains = []
+            source = Path("ru-full.domains.txt")
+            domains = []
 
-          for line in source.read_text(encoding="utf-8").splitlines():
-              value = line.strip().rstrip(",")
-              if not value or value.startswith("#"):
-                  continue
-              if value.startswith("domain:"):
-                  value = value[len("domain:"):]
-              value = value.strip().lower().rstrip(".")
-              if not re.fullmatch(r"(?=.{1,253}$)(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)(?:\.(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?))*", value):
-                  raise SystemExit(f"Invalid domain in source list: {value}")
-              domains.append("domain:" + value)
+            for line in source.read_text(encoding="utf-8").splitlines():
+                value = line.strip().rstrip(",")
+                if not value or value.startswith("#"):
+                    continue
+                if value.startswith("domain:"):
+                    value = value[len("domain:"):]
+                value = value.strip().lower().rstrip(".")
+                if not re.fullmatch(r"(?=.{1,253}$)(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)(?:\\.(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?))*", value):
+                    raise SystemExit(f"Invalid domain in source list: {value}")
+                domains.append("domain:" + value)
 
-          domains = sorted(set(domains))
-          if not domains:
-              raise SystemExit("Domain list is empty; refusing to publish empty rules")
+            domains = sorted(set(domains))
+            if not domains:
+                raise SystemExit("Domain list is empty; refusing to publish empty rules")
 
-          rules = [
-              {
-                  "remarks": "RU domains DIRECT",
-                  "domain": domains,
-                  "outboundTag": "direct",
-                  "enabled": True
-              }
-          ]
+            rules = [
+                {
+                    "remarks": "RU domains DIRECT",
+                    "domain": domains,
+                    "outboundTag": "direct",
+                    "enabled": True
+                }
+            ]
 
-          Path("ru-direct.json").write_text(
-              json.dumps(rules, ensure_ascii=False, indent=2) + "\n",
-              encoding="utf-8"
-          )
-          print(f"Generated ru-direct.json with {len(domains)} unique domains")
+            Path("ru-direct.json").write_text(
+                json.dumps(rules, ensure_ascii=False, indent=2) + "\\n",
+                encoding="utf-8"
+            )
+            print(f"Generated ru-direct.json with {len(domains)} unique domains")
           PY
 
           test -s ru-direct.json
